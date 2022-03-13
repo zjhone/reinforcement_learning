@@ -2,9 +2,10 @@
 # Author: Zhang Jianghu
 # Date: 2022/03/12
 import numpy as np
+import gym
 
 class Gambling_machine:
-
+    a = 0
 
 
 
