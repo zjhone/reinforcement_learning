@@ -12,4 +12,7 @@ for _ in range(10000):
 
   if done:
     observation = env.reset()
+
 env.close()
+
+
