@@ -7,6 +7,8 @@ import gym
 import time
 
 if __name__ == "__main__":
-
-
+    env = gym.make("GridWorld-v0")
+    env.reset()
+    env.render()
+    time.sleep(1)
     print("Done!")

@@ -57,8 +57,10 @@ class GridEnv(gym.Env):
 
     def getAction(self):
         return self.actions
+
     def getTerminate_states(self):
         return self.terminate_states
+
     def setAction(self,s):
         self.state=s
 
@@ -88,9 +90,11 @@ class GridEnv(gym.Env):
 
 
         return next_state, r,is_terminal,{}
+
     def _reset(self):
         self.state = self.states[int(random.random() * len(self.states))]
         return self.state
+
     def render(self, mode='human', close=False):
         if close:
             if self.viewer is not None:
@@ -168,13 +172,4 @@ class GridEnv(gym.Env):
         #self.robotrans.set_translation(self.x[self.state-1],self.y[self.state-1])
         self.robotrans.set_translation(self.x[self.state-1], self.y[self.state- 1])
 
-
-
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')
-
-
-
-
-
-
-
