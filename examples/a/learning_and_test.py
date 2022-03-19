@@ -3,11 +3,12 @@ import gym
 from qlearning import *
 import time
 from gym import wrappers
+
 #main函数
 if __name__ == "__main__":
-   # grid = grid_mdp.Grid_Mdp()  # 创建网格世界
-    #states = grid.getStates()  # 获得网格世界的状态空间
-    #actions = grid.getAction()  # 获得网格世界的动作空间
+    grid = grid_mdp.Grid_Mdp()  # 创建网格世界
+    states = grid.getStates()  # 获得网格世界的状态空间
+    actions = grid.getAction()  # 获得网格世界的动作空间
     sleeptime=0.5
     terminate_states= grid.env.getTerminate_states()
     #读入最优值函数
