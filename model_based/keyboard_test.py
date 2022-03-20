@@ -1,5 +1,5 @@
 # Title: keyboard_test.py
-# Author: Zhang Jianghu
+# Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/19
 # 此方法在linux下需要root权限，所以推荐tkinder来代替
 import keyboard

@@ -1,5 +1,5 @@
 # Title: test_0.py
-# Author: Zhang Jianghu
+# Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/12
 
 import gym

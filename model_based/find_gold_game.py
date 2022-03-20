@@ -1,5 +1,5 @@
-# Title: policy_iterate.py  策略迭代算法
-# Author: Zhang Jianghu
+# Title: find_gold_game.py  找金币游戏
+# Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/12
 
 import numpy as np

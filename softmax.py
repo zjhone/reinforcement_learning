@@ -1,5 +1,5 @@
 # Title: softmax.py
-# Author: Zhang Jianghu
+# Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/06
 
 import numpy as np

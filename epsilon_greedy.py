@@ -1,5 +1,5 @@
 # Title: epsilon_greedy.py
-# Author: Zhang Jiangh
+# Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/06
 
 import numpy as np
