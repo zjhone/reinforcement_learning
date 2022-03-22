@@ -66,6 +66,7 @@ class policy_algorithm:
         for state in self.states:
             if state in self.terminate_states: continue
             a1 = self.actions[0]
+            # TODO 这里也有一点问题，为何要取action[0]?
             # flags代表是否到达终点，s代表下一个状态，r代表奖励
             flags, s, r = grid_mdp.transform(state, a1)
             v1 = r + self.gamma * self.v[s-1]
