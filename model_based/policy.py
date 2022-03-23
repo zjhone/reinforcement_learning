@@ -4,8 +4,12 @@
 
 import gym
 import time
-import re
 import numpy as np
+import re
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
+fname = "/home/zjh/anaconda3/lib/python3.9/site-packages/matplotlib/mpl-data/fonts/ttf/YaHei.ttf"
+myfont = FontProperties(fname=fname)
 # import gym.envs.classic_control.grid_mdp as grid_map
 
 
@@ -18,13 +22,13 @@ class policy_algorithm:
         self.actions = grid_mdp.getActions()
         self.v = [0.0 for i in range(len(self.states))]
         print("初始化状态函数V(s)：", self.v)
-        self.state_and_action_space = grid_mdp.gett().keys()
+        self.state_and_action_space = grid_mdp.gett()
         self.terminate_states = grid_mdp.terminate_states()
         self.gamma = grid_mdp.getGamma()
 
     # 策略选择函数，类似于K摇臂赌博机
     def pi_evaluate(self):
-        for jt in self.state_and_action_space:  # 整理状态-动作空间
+        for jt in self.state_and_action_space.keys():  # 整理状态-动作空间
             temp = re.match(r'(.*)_(.*)', jt)
             if int(temp.group(1)) in self.pi_space.keys():
                 self.pi_space[int(temp.group(1))].append(temp.group(2))
@@ -42,30 +46,36 @@ class policy_algorithm:
     # 评估策略，返回状态值函数
     def policy_evaluate(self, grid_mdp):
 
-        MAX_ITERATION = 100  #最大迭代次数
-
+        MAX_ITERATION = 1000  #最大迭代次数
+        DELTA = []
         for i in range(MAX_ITERATION):
             delta = 0.0
             for state in self.states:
                 if state in self.terminate_states: continue
-                # 更新参数
-                action = self.pi[state]
-                # flags代表时候到达重点，s代表下一个状态，r代表奖励
-                flags, s, r = grid_mdp.transform(state, action)
-                new_v = r + self.gamma * self.v[s-1]   # python列表是从0索引开始的，因此需要减1对齐
-                # TODO 公式应当考虑pi求和，确定性策略更新的值函数不可用，求出的最优策略不可用
+                CNT = len(self.pi_space[state])
+                new_v = 0.0
+                for action in self.pi_space[state]:
+                    flags, s, r = grid_mdp.transform(state, action)
+                    new_v = new_v + (r + self.gamma * self.v[s - 1]) / CNT
+
                 delta = delta + abs(self.v[state-1] - new_v)
                 self.v[state-1] = new_v
-            if delta < 1e-3: break
-            print(f'第{i}次迭代后', self.v)
+            DELTA.append(delta)
+            if delta < 1e-7: break
+            print(f'第{i}次策略评估：', self.v)
 
-        print("策略评估后V：", self.v)
+        # plt.figure()    # 绘制delta变化曲线
+        # plt.plot(DELTA)
+        # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+        # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
+        # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
+        # plt.show()
 
     # 策略改进
     def policy_improve(self, grid_mdp):
         for state in self.states:
             if state in self.terminate_states: continue
-            a1 = self.actions[0]
+            a1 = self.pi_space[state][0]
             # TODO 这里也有一点问题，为何要取action[0]?
             # flags代表是否到达终点，s代表下一个状态，r代表奖励
             flags, s, r = grid_mdp.transform(state, a1)
@@ -84,15 +94,32 @@ class policy_algorithm:
         for i in range(1):
             self.policy_evaluate(grid_mdp)
             self.policy_improve(grid_mdp)
-        print('最后的状态值：', self.v, '\n策略：', self.pi)
+        print('最后的状态值：', self.v, '\n均匀随机性策略（学习结果）：', self.pi)
+
+    def search_solution(self, query):
+        ret = list()
+        for i in range(100):
+            if query in self.terminate_states:
+                # print("结束!")
+                break
+            else:
+                action = self.pi[query]
+                key = "%d_%s"%(query, action)
+                # print(f'{query}-->{action}')
+                ret.append((query, action))
+                query = self.state_and_action_space[key]
+                continue
+            print("不存在最好路径。")
+        print(ret)
+        return ret
+
 
 
 if __name__ == "__main__":
     env = gym.make("GridWorld-v0")
     env.reset()
-    env.setState(1)
     env.render()
-    time.sleep(2)
+    time.sleep(1)
 
     DP = policy_algorithm(env)
     print('状态空间：', DP.states,type(DP.states[0]), '\n动作空间：', DP.actions, type(DP.actions[0]))
@@ -112,4 +139,18 @@ if __name__ == "__main__":
 
     print("-----CALCULATING-----")
     DP.policy_iterate(env)  # 策略迭代算法
+
+    my_query = input('Please set the robot state:')
+    env.setState(int(my_query))
+    env.render()
+    time.sleep(1)
+
+    print("\033[0;32;40mGUIDING……\033[0m")
+    best_road = DP.search_solution(int(my_query))
+    time.sleep(1)
+    if env.guide(best_road):
+        print("\033[0;32;40mGUIDE COMPELETED!\033[0m")
+    else:
+        print("\033[0;31;40mROAD LIST EMPTY!\033[0m")
+    time.sleep(3)
     print("---------DONE--------")
