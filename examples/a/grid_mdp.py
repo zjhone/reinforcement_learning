@@ -169,7 +169,7 @@ class GridEnv(gym.Env):
             self.viewer.add_geom(self.robot)
 
         if self.state is None: return None
-        #self.robotrans.set_translation(self.x[self.state-1],self.y[self.state-1])
+        # 状态转移
         self.robotrans.set_translation(self.x[self.state-1], self.y[self.state- 1])
 
         return self.viewer.render(return_rgb_array=mode == 'rgb_array')

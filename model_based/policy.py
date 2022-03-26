@@ -8,10 +8,10 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
-fname = "/home/zjh/anaconda3/lib/python3.9/site-packages/matplotlib/mpl-data/fonts/ttf/YaHei.ttf"
+fname = "/home/zjh/font/simhei.ttf"
 myfont = FontProperties(fname=fname)
 # import gym.envs.classic_control.grid_mdp as grid_map
-
+# sss
 
 class policy_algorithm:
     def __init__(self, grid_mdp):
