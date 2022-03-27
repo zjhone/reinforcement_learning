@@ -1,4 +1,4 @@
-# Title: policy.py  策略迭代算法
+# Title: policy.py  策略迭代算法-基于折扣
 # Author: Zhang Jianghu<zhang_jianghu@163.com>
 # Date: 2022/03/20
 
@@ -8,7 +8,7 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
-fname = "/media/zjh/SDXC/linux-tools/linux_font/simhei.ttf"
+fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
 myfont = FontProperties(fname=fname)
 # import gym.envs.classic_control.grid_mdp as grid_map
 
@@ -64,12 +64,12 @@ class policy_algorithm:
             if delta < 1e-7: break
             print(f'第{i}次策略评估：', self.v)
 
-        # plt.figure()    # 绘制delta变化曲线
-        # plt.plot(DELTA)
-        # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
-        # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
-        # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
-        # plt.show()
+        plt.figure()    # 绘制delta变化曲线
+        plt.plot(DELTA)
+        plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+        plt.xlabel('策略评估迭代次数', fontproperties=myfont)
+        plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
+        plt.show()
 
     # 策略改进
     def policy_improve(self, grid_mdp):
@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     print("\033[0;32;40mGUIDING……\033[0m")
     best_road = DP.search_solution(int(my_query))
-    time.sleep(2)
+    time.sleep(1)
     env.guide(best_road)
     time.sleep(5)
     print("--------------------DONE--------------------")
