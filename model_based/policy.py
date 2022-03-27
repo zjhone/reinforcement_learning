@@ -8,10 +8,10 @@ import numpy as np
 import re
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
-fname = "/home/zjh/font/simhei.ttf"
+fname = "/media/zjh/SDXC/linux-tools/linux_font/simhei.ttf"
 myfont = FontProperties(fname=fname)
 # import gym.envs.classic_control.grid_mdp as grid_map
-# sss
+
 
 class policy_algorithm:
     def __init__(self, grid_mdp):
@@ -23,7 +23,7 @@ class policy_algorithm:
         self.v = [0.0 for i in range(len(self.states))]
         print("初始化状态函数V(s)：", self.v)
         self.state_and_action_space = grid_mdp.gett()
-        self.terminate_states = grid_mdp.terminate_states()
+        self.terminate_states = grid_mdp.getTerminate_states()
         self.gamma = grid_mdp.getGamma()
 
     # 策略选择函数，类似于K摇臂赌博机
@@ -98,7 +98,7 @@ class policy_algorithm:
 
     def search_solution(self, query):
         ret = list()
-        for i in range(100):
+        for i in range(100):  # 路径查询100次
             if query in self.terminate_states:
                 # print("结束!")
                 break
@@ -109,15 +109,17 @@ class policy_algorithm:
                 ret.append((query, action))
                 query = self.state_and_action_space[key]
                 continue
-            print("不存在最好路径。")
-        print(ret)
+            print("\033[0;31;40m不存在最好路径!\033[0m")
+
+        print(f"\033[0;32;40m最佳路径： {ret}\033[0m")
         return ret
 
 
 
 if __name__ == "__main__":
     env = gym.make("GridWorld-v0")
-    env.reset()
+    # env.reset()
+    env.setState(1)
     env.render()
     time.sleep(1)
 
@@ -137,20 +139,17 @@ if __name__ == "__main__":
     # print('当前状态：', env.getState())
     # time.sleep(5)
 
-    print("-----CALCULATING-----")
+    print("--------------------CALCULATING--------------------")
     DP.policy_iterate(env)  # 策略迭代算法
 
-    my_query = input('Please set the robot state:')
+    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
     env.setState(int(my_query))
     env.render()
     time.sleep(1)
 
     print("\033[0;32;40mGUIDING……\033[0m")
     best_road = DP.search_solution(int(my_query))
-    time.sleep(1)
-    if env.guide(best_road):
-        print("\033[0;32;40mGUIDE COMPELETED!\033[0m")
-    else:
-        print("\033[0;31;40mROAD LIST EMPTY!\033[0m")
-    time.sleep(3)
-    print("---------DONE--------")
+    time.sleep(2)
+    env.guide(best_road)
+    time.sleep(5)
+    print("--------------------DONE--------------------")
