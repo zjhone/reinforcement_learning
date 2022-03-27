@@ -91,12 +91,20 @@ class policy_algorithm:
 
     # 策略评估 + 策略改进 = 策略迭代算法
     def policy_iterate(self, grid_mdp):
+        '''
+        :param grid_mdp: 游戏模型
+        :return: 最优策略，放在了类属性里
+        '''
         for i in range(1):
             self.policy_evaluate(grid_mdp)
             self.policy_improve(grid_mdp)
         print('最后的状态值：', self.v, '\n均匀随机性策略（学习结果）：', self.pi)
 
     def search_solution(self, query):
+        '''
+        :param query: 查询某个状态的最佳路径
+        :return: 最佳状态-动作对（即最佳策略）
+        '''
         ret = list()
         for i in range(100):  # 路径查询100次
             if query in self.terminate_states:
