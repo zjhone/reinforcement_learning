@@ -17,7 +17,9 @@ class policy_algorithm:
     def __init__(self, grid_mdp):
         # 初始化模型参数
         self.pi = dict()
+        self.new_pi = dict()
         self.pi_space = dict()
+        self.probabilities = dict()
         self.states = grid_mdp.getStates()
         self.actions = grid_mdp.getActions()
         self.v = [0.0 for i in range(len(self.states))]
@@ -26,7 +28,7 @@ class policy_algorithm:
         self.terminate_states = grid_mdp.getTerminate_states()
         self.gamma = grid_mdp.getGamma()
 
-    # 策略选择函数，类似于K摇臂赌博机
+    # 策略选择函数，类似于K摇臂赌博机，同时更新概率函数
     def pi_evaluate(self):
         for jt in self.state_and_action_space.keys():  # 整理状态-动作空间
             temp = re.match(r'(.*)_(.*)', jt)
@@ -37,57 +39,66 @@ class policy_algorithm:
                 li.append(temp.group(2))
                 self.pi_space[int(temp.group(1))] = li
 
-        # for state in self.states:   # 随机初始化策略, 这个不够严谨，换用下面的for
-        #     self.pi[state] = self.actions[np.random.choice(len(self.actions), size=1, replace=True)[0]]
-        for state in self.pi_space.keys():
+        for pt in self.pi_space.keys():  # 初始化状态动作概率
+            paction = dict()
+            for jt in self.pi_space[pt]:
+                paction[jt] = 1 / len(self.pi_space[pt])  # 每个状态均匀分布
+            self.probabilities[pt] = paction
+
+        print('状态-动作概率pi(x,a): ', self.probabilities)
+
+        for state in self.pi_space.keys():  # 初始化策略（均匀分布）
             self.pi[state] = self.pi_space[state][np.random.choice(len(self.pi_space[state]),
                                                                         size=1, replace=True)[0]]
 
     # 评估策略，返回状态值函数
     def policy_evaluate(self, grid_mdp):
 
-        MAX_ITERATION = 1000  #最大迭代次数
+        MAX_ITERATION = 5  #最大状态值更新次数，即累计奖赏参数
         DELTA = []
-        for i in range(MAX_ITERATION):
+        for t in range(MAX_ITERATION):
             delta = 0.0
             for state in self.states:
                 if state in self.terminate_states: continue
-                CNT = len(self.pi_space[state])
                 new_v = 0.0
                 for action in self.pi_space[state]:
                     flags, s, r = grid_mdp.transform(state, action)
-                    new_v = new_v + (r + self.gamma * self.v[s - 1]) / CNT
-
+                    # 此处考虑选取“每个摇臂”概率值pi(x,a)的变化，可用epsilon-greedy来对这里进行优化
+                    Qxa = (r + self.gamma * self.v[s - 1])  # 状态-动作值，这里执行动作后是1个确定性动作，有明确的新状态
+                    new_v = new_v + Qxa * self.probabilities[state][action]  # 状态值
                 delta = delta + abs(self.v[state-1] - new_v)
                 self.v[state-1] = new_v
-            DELTA.append(delta)
-            if delta < 1e-7: break
-            print(f'第{i}次策略评估：', self.v)
 
-        plt.figure()    # 绘制delta变化曲线
-        plt.plot(DELTA)
-        plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
-        plt.xlabel('策略评估迭代次数', fontproperties=myfont)
-        plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
-        plt.show()
+            DELTA.append(delta)
+            print(f'第{t}次状态值更新：', self.v)
+            if t == MAX_ITERATION-1 : break
+            # if delta < 1e-6: break
+
+        # plt.figure()    # 绘制delta变化曲线
+        # plt.plot(DELTA)
+        # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+        # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
+        # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
+        # plt.show()
 
     # 策略改进
     def policy_improve(self, grid_mdp):
         for state in self.states:
             if state in self.terminate_states: continue
-            a1 = self.pi_space[state][0]
-            # TODO 这里也有一点问题，为何要取action[0]?
+            a1 = self.pi_space[state][0]  # 每个状态以第一个动作为基准，再通过后面的for选出最大的action
             # flags代表是否到达终点，s代表下一个状态，r代表奖励
             flags, s, r = grid_mdp.transform(state, a1)
-            v1 = r + self.gamma * self.v[s-1]
+            Qxa = r + self.gamma * self.v[s-1]
             # 贪婪策略
             for action in self.actions:
                 # flags代表时候到达重点，s代表下一个状态，r代表奖励
                 flags, s, r = grid_mdp.transform(state, action)
-                if v1 <= r + self.gamma * self.v[s-1]:
+                if Qxa <= r + self.gamma * self.v[s-1]:
                     a1 = action
-                    v1 = r + self.gamma * self.v[s-1]
-            self.pi[state] = a1
+                    Qxa = r + self.gamma * self.v[s-1]
+            self.new_pi[state] = a1
+            # TODO 怎么更新pi(x,a)？epsilon-greedy or softmax !
+
 
     # 策略评估 + 策略改进 = 策略迭代算法
     def policy_iterate(self, grid_mdp):
@@ -95,10 +106,15 @@ class policy_algorithm:
         :param grid_mdp: 游戏模型
         :return: 最优策略，放在了类属性里
         '''
-        for i in range(1):
+        for i in range(10):  # 策略改进10次
             self.policy_evaluate(grid_mdp)
             self.policy_improve(grid_mdp)
-        print('最后的状态值：', self.v, '\n均匀随机性策略（学习结果）：', self.pi)
+            print(f'\n第{i}次改进 状态值： { self.v} \n此次均匀随机策略改进学习结果得到的最优策略：', self.new_pi, '\n')
+            if self.new_pi == self.pi:
+                break
+            else:
+                self.pi = self.new_pi
+
 
     def search_solution(self, query):
         '''
@@ -150,6 +166,7 @@ if __name__ == "__main__":
     print("--------------------CALCULATING--------------------")
     DP.policy_iterate(env)  # 策略迭代算法
 
+    # 查询最优策略
     my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
     env.setState(int(my_query))
     env.render()
@@ -160,4 +177,5 @@ if __name__ == "__main__":
     time.sleep(1)
     env.guide(best_road)
     time.sleep(5)
+
     print("--------------------DONE--------------------")
