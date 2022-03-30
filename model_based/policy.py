@@ -15,7 +15,7 @@ myfont = FontProperties(fname=fname)
 
 class policy_algorithm:
     def __init__(self, grid_mdp):
-        # 初始化模型参数
+        # 初始化模型参数E=<X, A, P, R>
         self.pi = dict()
         self.new_pi = dict()
         self.pi_space = dict()

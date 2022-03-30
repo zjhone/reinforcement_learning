@@ -3,7 +3,6 @@
 # Date: 2022/03/28
 
 
-if __name__=="main":
-
-
+if __name__=="__main__":
+    print("hello, world!\n")
 

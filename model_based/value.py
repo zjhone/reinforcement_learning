@@ -9,7 +9,7 @@ import re
 
 class value_algorithm:
     def __init__(self, grid_mdp):
-        # 初始化模型参数
+        # 初始化模型参数E=<X, A, P, R>
         self.states = grid_mdp.getStates()
         self.actions = grid_mdp.getActions()
         self.state_and_action_space = grid_mdp.gett()
