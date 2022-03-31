@@ -20,10 +20,11 @@ class mento_carlo_on_policy:
         self.new_pi = dict()
         self.pi_space = dict()
         self.probabilities = dict()
+        self.new_probabilities = dict()
         # 引入的输入：
         self.x0 = 1  # 设置状态1为起始状态
-        self.epsilon = 0.5
-        self.T = 10  # 最大执行步数为10步
+        self.epsilon = 0.2
+        self.T = 8  # 最大执行步数为8步
         self.v = [0.0 for i in range(len(self.states))]
         # self.Qxa = dict()  # 状态-动作值函数
         print("初始化状态函数V(s)：", self.v)
@@ -47,10 +48,14 @@ class mento_carlo_on_policy:
 
         print('状态-动作概率pi(x,a): ', self.probabilities)
 
+        for state in self.pi_space.keys():  # 初始化策略（均匀分布）
+            self.pi[state] = self.pi_space[state][np.random.choice(len(self.pi_space[state]),
+                                                                        size=1, replace=True)[0]]
+
     # 基于epsilon-greeedy的蒙特卡罗采样
     def trace_cal(self):
         P = self.probabilities   # 动作选择概率
-        sampling_list = list()  # 采样是有顺序的，故不建议用字典来存储
+        smp_list = list()  # 采样是有顺序的，故不建议用字典来存储
         state = self.x0
         for t in range(self.T):  # 初始化T步轨迹
             temp = list(P[state].values())   # 从起始位置x0出发，temp 代表当前状态下选取每个动作的概率值
@@ -58,46 +63,70 @@ class mento_carlo_on_policy:
                                                                         size=1, replace=True, p=temp)[0]]
             key = "%d_%s" % (state, action)
             r = self.R[key]
-            sampling_list.append((state, action, r))
+            smp_list.append((state, action, r))
             state = self.state_and_action_space[key]
-        # print("\n此次采样轨迹为： ", sampling_list)
-        return sampling_list
+
+        return smp_list
 
     # 核心算法：
     def mente_carlo_interate(self):
 
-        MAX_SAMPLING_NUM = 100   # 最大轨迹数量
+        MAX_SAMPLING_NUM = 10000   # 最大轨迹数量
         Qxa = dict()
         countxa = dict()
 
         for s in range(MAX_SAMPLING_NUM):
-            sampling_temp = self.trace_cal()   # 采样
-            for pt in sampling_temp:
-                key = "%d_%s" %(pt[0], pt[1])
-                if key in Qxa:
-                    continue
+            smp = self.trace_cal()   # 采样
+            self.x0 = np.random.choice(5, size=1, replace=True)[0]+1 # 变动采样起始点
+            print(f"\n第{s}次采样轨迹为： {smp}")
+            for pt in smp:
+                # 拓展Qxa与countxa
+                if pt[0] in Qxa :
+                    if pt[1] in Qxa[pt[0]]:
+                        continue
+                    else:
+                        Qxa[pt[0]][pt[1]] = 0.0
+                        countxa[pt[0]][pt[1]] = 0
                 else:
-                    Qxa[key] = 0.0
-                    countxa[key] = 0
+                    Qxa[pt[0]] = dict()
+                    countxa[pt[0]] = dict()
+                    Qxa[pt[0]][pt[1]] = 0.0
+                    countxa[pt[0]][pt[1]] = 0
 
             for t in range(self.T):
                 R = 0  # 求奖赏
-                key = "%d_%s" %(sampling_temp[t][0], sampling_temp[t][1])
                 for j in np.linspace(t+1, self.T-1, num=(self.T-t+1), dtype=int):
-                    R = R + sampling_temp[t][2] / (self.T-t)
+                    R = R + (smp[t][2] / (self.T-t))
+                # 值函数更新
+                Qxa[smp[t][0]][smp[t][1]] = (Qxa[smp[t][0]][smp[t][1]] *
+                                                                 countxa[smp[t][0]][smp[t][1]] + R) / \
+                                                                (countxa[smp[t][0]][smp[t][1]] + 1)
+                # 计数器
+                countxa[smp[t][0]][smp[t][1]] = countxa[smp[t][0]][smp[t][1]] + 1
 
-                Qxa[key] = (Qxa[key] * countxa[key] + R) / (countxa[key] + 1)
-                countxa[key] = countxa[key] + 1
+            # 对所有已见状态x
+            for xkt in Qxa.keys():
+                # new_pi 代表当前最优动作
+                self.new_pi[xkt] = max(Qxa[xkt], key=Qxa[xkt].get)
 
-            # 对所有已见状态x更新策略pi
-            for kt in Qxa.keys():
-                temp = re.match(r'(.*)_(.*)', kt)
-                temp_state = temp.group(1)
-                temp_action = temp.group(2)
+            print('此次最优状态-动作：', self.new_pi)
 
+            # 更新确定性策略pi以及pi(x,a)
+            for state in self.pi.keys():
+                # epislon-greedy算法
+                P = self.probabilities  # 动作选择概率(均匀)
+                # 以epsilon的概率按照均匀概率选择动作
+                if np.random.rand() < self.epsilon or state not in self.new_pi:
+                    temp = list(P[state].values())
+                    self.pi[state] = list(P[state].keys())[np.random.choice(len(self.pi_space[state]),
+                                                                        size=1, replace=True, p=temp)[0]]
+                else:  # 以1-epsilon的概率取当前最佳摇臂
+                    self.pi[state] = self.new_pi[state]
 
-        print(Qxa)
-        print((countxa))
+            print(Qxa)
+            print(countxa)
+        print('当前最佳策略：', self.pi)
+
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v0")
@@ -105,9 +134,10 @@ if __name__=="__main__":
     # env.render()
     MF = mento_carlo_on_policy(env)
     MF.init_probabilities()
-    print(MF.pi_space)
-    # MF.trace_cal()
+    print('动作空间细节：', MF.pi_space)
+    t0 = time.time()
     MF.mente_carlo_interate()
-    # time.sleep(1)
+    t1 = time.time()
+    print(f"\n算法耗时： {t1-t0} s")
     print("--------------------DONE--------------------")
 
