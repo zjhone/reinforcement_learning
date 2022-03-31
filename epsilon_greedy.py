@@ -34,7 +34,7 @@ def epsilon_greedy(GM, T, e):
         if np.random.rand() < e:
             k = np.random.randint(K)   # 摇臂概率采用均匀分布
         else:
-            k = Q.argmax()
+            k = Q.argmax()   # 每个摇臂的平均奖赏
         v = GM.shake_handle(k)
         r = r + v
         Q[k] = (Q[k]*cnt[k] + v)/(cnt[k] + 1)
