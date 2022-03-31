@@ -125,7 +125,7 @@ class mento_carlo_on_policy:
 
             print(Qxa)
             print(countxa)
-        print('当前最佳策略：', self.pi)
+        print(f'\n\033[0;32;40m当前最佳策略：{self.pi}\033[0m')
 
 
 if __name__=="__main__":
