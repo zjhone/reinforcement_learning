@@ -99,7 +99,7 @@ class sarsa_algorithm:
         countxa = self.counter
         DELTA = []
         flags = 0
-        for _ in range(MAX_NUM):
+        for et in range(MAX_NUM):
             # random的作用为变动采样起始点，避免轨迹为同一条
             self.x0 = np.random.choice(5, size=1, replace=True)[0] + 1
             x = self.x0
@@ -133,25 +133,23 @@ class sarsa_algorithm:
                 else:
                     countxa[x] = dict()
                     countxa[x][a] = 1
+                # 更新计数器
+                if x_ in countxa :
+                    if a_ in countxa[x_]:
+                        countxa[x_][a_] = countxa[x_][a_] + 1
+                    else:
+                        countxa[x_][a_] = 1
+                else:
+                    countxa[x_] = dict()
+                    countxa[x_][a_] = 1
 
                 x = x_
                 a = a_
 
-                # 更新计数器
-                if x in countxa :
-                    if a in countxa[x]:
-                        countxa[x][a] = countxa[x][a] + 1
-                    else:
-                        countxa[x][a] = 1
-                else:
-                    countxa[x] = dict()
-                    countxa[x][a] = 1
-
                 # 到达终止点，跳出子循环重来
                 if x in self.terminate_states: break
 
-
-            print(f'\033[0;33;40m此次最优状态-动作：{self.pi}\033[0m')
+            print(f'\033[0;33;40m第{et}次最优状态-动作：{self.pi}\033[0m')
 
             DELTA.append(delta)
             condition = bool(delta < 1e-6)
@@ -167,6 +165,7 @@ class sarsa_algorithm:
         plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
         plt.xlabel('迭代次数', fontproperties=myfont)
         plt.ylabel('dalta', fontproperties=myfont)
+        plt.title("Sarsa")
         plt.show()
 
 
