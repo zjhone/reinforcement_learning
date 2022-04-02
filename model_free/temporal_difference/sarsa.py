@@ -93,7 +93,7 @@ class sarsa_algorithm:
     # 核心算法：
     def sarsa_interate(self):
 
-        MAX_NUM = 100   # 最大迭代数量
+        MAX_NUM = 1000   # 最大迭代数量
         alpha = 0.1
         Qxa = self.QXA
         countxa = self.counter
@@ -136,6 +136,16 @@ class sarsa_algorithm:
 
                 x = x_
                 a = a_
+
+                # 更新计数器
+                if x in countxa :
+                    if a in countxa[x]:
+                        countxa[x][a] = countxa[x][a] + 1
+                    else:
+                        countxa[x][a] = 1
+                else:
+                    countxa[x] = dict()
+                    countxa[x][a] = 1
 
                 # 到达终止点，跳出子循环重来
                 if x in self.terminate_states: break
