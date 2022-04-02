@@ -20,10 +20,9 @@ class mento_carlo_on_policy:
         self.gamma = grid_mdp.getGamma()
         self.R = grid_mdp.getRewards()   # 奖赏
         self.pi = dict()
-        self.new_pi = dict()
+
         self.pi_space = dict()
         self.probabilities = dict()
-        self.new_probabilities = dict()
         self.QXA = dict()       # 记录状态-动作值
         self.counter = dict()   # 计数器
         # 引入的输入：
@@ -116,7 +115,7 @@ class mento_carlo_on_policy:
                     P_AXU.append(self.epsilon/len(self.probabilities[pt[0]]))
             # print('修正概率: ', P_AXU)
 
-            for pt in smp:   # 此循环用来计数
+            for pt in smp:   # 拓展
                 if pt[0] in countxa :
                     if pt[1] in countxa[pt[0]]:
                         continue
@@ -127,6 +126,7 @@ class mento_carlo_on_policy:
                     countxa[pt[0]][pt[1]] = 0
 
             for t in range(self.T):
+
                 R = 0.0  # 求奖赏
                 p_axu = 1.0
                 for i in np.linspace(t, self.T-1, num=self.T, dtype=int):
@@ -143,15 +143,18 @@ class mento_carlo_on_policy:
                 # 更新计数器
                 countxa[smp[t][0]][smp[t][1]] = countxa[smp[t][0]][smp[t][1]] + 1
 
+                # 到达终止点，跳出子循环重来
+                if smp[t][0] in self.terminate_states: break
+
+
             # 对所有已见状态x
+            # 更新确定性策略pi以及pi(x,a)
             for xkt in Qxa.keys():
                 # new_pi 代表当前最优动作
-                self.new_pi[xkt] = max(Qxa[xkt], key=Qxa[xkt].get)
+                self.pi[xkt] = max(Qxa[xkt], key=Qxa[xkt].get)
 
-            print(f'\033[0;33;40m此次最优状态-动作：{self.new_pi}\033[0m')
+            print(f'\033[0;33;40m此次最优状态-动作：{self.pi}\033[0m')
 
-            # 更新确定性策略pi以及pi(x,a)
-            self.pi = self.new_pi
             self.QXA = Qxa
 
         print(f'\n最终的状态-动作值函数： {Qxa}')
