@@ -29,9 +29,6 @@ class mento_carlo_on_policy:
         self.x0 = 1  # 设置状态1为起始状态
         self.epsilon = 0.2
         self.T = 10  # 最大执行步数为8步
-        self.v = [0.0 for i in range(len(self.states))]
-
-        print("初始化状态函数V(s)：", self.v)
 
     # 初始化概率函数
     def init_params(self):
