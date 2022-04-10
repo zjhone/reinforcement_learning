@@ -99,7 +99,7 @@ class value_algorithm:
 
 
 if __name__ =="__main__":
-    env = gym.make("GridWorld-v0")
+    env = gym.make("GridWorld-v1")
     # env.reset()
     env.setState(1)
     env.render()

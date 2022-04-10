@@ -54,7 +54,7 @@ class policy_algorithm:
     # 评估策略，返回状态值函数
     def policy_evaluate(self, grid_mdp):
 
-        MAX_ITERATION = 5  #最大状态值更新次数，即累计奖赏参数
+        MAX_ITERATION = 10  #最大状态值更新次数，即累计奖赏参数
         DELTA = []
         for t in range(MAX_ITERATION):
             delta = 0.0
@@ -90,14 +90,13 @@ class policy_algorithm:
             flags, s, r = grid_mdp.transform(state, a1)
             Qxa = r + self.gamma * self.v[s-1]
             # 贪婪策略
-            for action in self.actions:
+            for action in self.pi_space[state]:
                 # flags代表时候到达重点，s代表下一个状态，r代表奖励
                 flags, s, r = grid_mdp.transform(state, action)
                 if Qxa <= r + self.gamma * self.v[s-1]:
                     a1 = action
                     Qxa = r + self.gamma * self.v[s-1]
             self.new_pi[state] = a1
-            # TODO 怎么更新pi(x,a)？epsilon-greedy or softmax !
 
 
     # 策略评估 + 策略改进 = 策略迭代算法
@@ -141,7 +140,7 @@ class policy_algorithm:
 
 
 if __name__ == "__main__":
-    env = gym.make("GridWorld-v0")
+    env = gym.make("GridWorld-v1")
     # env.reset()
     env.setState(1)
     env.render()

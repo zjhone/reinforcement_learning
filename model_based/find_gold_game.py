@@ -21,7 +21,7 @@ position = 0
 screen.fill(bgColor)
 
 if __name__ == "__main__":
-    env = gym.make("GridWorld-v0")
+    env = gym.make("GridWorld-v1")
     env.reset()
     env.render()
     print(env.gett())
