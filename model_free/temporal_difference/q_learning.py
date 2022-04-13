@@ -7,6 +7,7 @@ import gym
 import time
 import copy
 import numpy as np
+import my_func.list_deal as md
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  # 解决中文无法正常显示问题
 fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
@@ -162,7 +163,7 @@ class qlearning_algorithm:
 
 
 if __name__=="__main__":
-    env = gym.make("GridWorld-v0")
+    env = gym.make("GridWorld-v1")
     env.setState(1)
     # env.render()
     MDP = qlearning_algorithm(env)
@@ -177,7 +178,10 @@ if __name__=="__main__":
     print(f"\n算法耗时： {t1-t0} s")
 
     plt.figure()  # 绘制delta变化曲线
-    plt.plot(DELTA)
+    plt.plot(md.my_reshape(DELTA, 20), color='r')
+    plt.plot(DELTA, color ='b')
+    plt.plot(md.cumulative(DELTA),color='y')
+    plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)
