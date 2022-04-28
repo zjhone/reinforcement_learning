@@ -17,7 +17,7 @@ def my_reshape(my_list, interval):
         if i%interval == interval-1:
            tmp1 = tmp1 + 1
     # print(ret)
-    print(SA)
+    # print(SA)
 
     return SA
 

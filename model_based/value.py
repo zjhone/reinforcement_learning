@@ -6,6 +6,13 @@ import numpy as np
 import time
 import gym
 import re
+import matplotlib.pyplot as plt
+import my_func.list_deal as md
+from matplotlib.font_manager import FontProperties  # 解决中文无法正常显示问题
+fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
+myfont = FontProperties(fname=fname)
+
+DELTA = []
 
 class value_algorithm:
     def __init__(self, grid_mdp):
@@ -46,7 +53,7 @@ class value_algorithm:
                                                                         size=1, replace=True)[0]]
     # 值迭代核心算法
     def value_iterate(self, grid_mdp):
-        MAX_ITERATION = 100    # 累积奖赏参数
+        MAX_ITERATION = 10000    # 累积奖赏参数
         for t in range(MAX_ITERATION):
             delta = 0.0
             for state in self.states:
@@ -63,16 +70,9 @@ class value_algorithm:
                 delta = delta + abs(v1 - self.v[state-1])
                 self.pi[state] = a1
                 self.v[state-1]  = v1
-
+            DELTA.append(delta)
             if delta < 1e-6: break   # 设定收敛阈值
         print("返回的最优策略为： ", self.pi)
-
-        # plt.figure()    # 绘制delta变化曲线
-        # plt.plot(DELTA)
-        # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
-        # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
-        # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
-        # plt.show()
 
     def search_solution(self, query):
         '''
@@ -124,16 +124,30 @@ if __name__ =="__main__":
     print("--------------------CALCULATING--------------------")
     DP.value_iterate(env)  # 策略迭代算法
 
-    # 查询最优策略
-    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
-    env.setState(int(my_query))
-    env.render()
-    time.sleep(1)
-
-    print("\033[0;32;40mGUIDING……\033[0m")
-    best_road = DP.search_solution(int(my_query))
-    time.sleep(1)
-    env.guide(best_road)
-    time.sleep(2)
+    # # 查询最优策略
+    # my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
+    # env.setState(int(my_query))
+    # env.render()
+    # time.sleep(1)
+    #
+    # print("\033[0;32;40mGUIDING……\033[0m")
+    # best_road = DP.search_solution(int(my_query))
+    # time.sleep(1)
+    # env.guide(best_road)
+    # time.sleep(2)
 
     print("--------------------DONE--------------------")
+
+    ##########################################################
+    plt.figure()  # 绘制delta变化曲线
+    plt.grid()
+    plt.plot(md.my_reshape(DELTA, 20), color='r')
+    plt.plot(DELTA, color ='b')
+    # plt.plot(md.cumulative(DELTA),color='y')
+    plt.plot(md.list_fit(DELTA, 3), color='k')
+    plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+    plt.xlabel('迭代次数', fontproperties=myfont)
+    plt.ylabel('dalta', fontproperties=myfont)
+    plt.title("Value Iteration")
+    plt.show()
+    ##########################################################

@@ -13,7 +13,7 @@ from matplotlib.font_manager import FontProperties  # 解决中文无法正常�
 fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
 myfont = FontProperties(fname=fname)
 
-DELTA = []
+DELTA = []   # 记录模型误差变化过程
 
 class qlearning_algorithm:
     def __init__(self, grid_mdp):
@@ -96,7 +96,7 @@ class qlearning_algorithm:
     # 核心算法：
     def qlearning_interate(self):
 
-        MAX_NUM = 10000   # 最大迭代数量
+        MAX_NUM = 100000   # 最大迭代数量
         alpha = 0.1
         Qxa = self.QXA
         countxa = self.counter
@@ -150,34 +150,70 @@ class qlearning_algorithm:
                 # 到达终止点，跳出子循环重来
                 if x in self.terminate_states: break
 
-            print(f'\033[0;33;40m第{et}次最优状态-动作：{self.pi}\033[0m')
+            # print(f'\033[0;33;40m第{et}次最优状态-动作：{self.pi}\033[0m')
 
             DELTA.append(delta)
-            condition = bool(delta < 1e-6)
-            # 达到收敛条件，退出大循环
-            if condition: break
 
-        print(f'\n最终的状态-动作值函数： {Qxa}')
-        print(f'计数器： {countxa}')
+            if delta < 1e-6:  break   # 达到收敛条件，退出大循环
+
+        # print(f'\n最终的状态-动作值函数： {Qxa}')
+        # print(f'计数器： {countxa}')
         print(f'\n\033[1;32;40m当前最佳策略：{self.pi}\033[0m')
+
+    def search_solution(self, query):
+        '''
+        :param query: 查询某个状态的最佳路径
+        :return: 最佳状态-动作对（即最佳策略）
+        '''
+        ret = list()
+        for i in range(100):  # 路径查询100次
+            if query in self.terminate_states:
+                # print("结束!")
+                break
+            else:
+                action = self.pi[query]
+                key = "%d_%s"%(query, action)
+                # print(f'{query}-->{action}')
+                ret.append((query, action))
+                query = self.state_and_action_space[key]
+                continue
+            print("\033[0;31;40m不存在最好路径!\033[0m")
+
+        print(f"\033[0;32;40m最佳路径： {ret}\033[0m")
+        return ret
 
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v1")
     env.setState(1)
-    # env.render()
+    env.render()
     MDP = qlearning_algorithm(env)
 
     MDP.init_params()
 
+    print("--------------------CALCULATING--------------------")
     t0 = time.time()
     MDP.qlearning_interate()
     t1 = time.time()
 
+    # 查询最优策略
+    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
+    env.setState(int(my_query))
+    env.render()
+    time.sleep(1)
+
+    print("\033[0;32;40mGUIDING……\033[0m")
+    best_road = MDP.search_solution(int(my_query))
+    time.sleep(1)
+    env.guide(best_road)
+    time.sleep(2)
+
     print("--------------------DONE--------------------")
     print(f"\n算法耗时： {t1-t0} s")
+
     ##########################################################
     plt.figure()  # 绘制delta变化曲线
+    plt.grid()
     plt.plot(md.my_reshape(DELTA, 20), color='r')
     plt.plot(DELTA, color ='b')
     # plt.plot(md.cumulative(DELTA),color='y')

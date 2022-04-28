@@ -6,12 +6,15 @@ import gym
 import time
 import numpy as np
 import re
+import my_func.list_deal as md
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
 fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
 myfont = FontProperties(fname=fname)
 # import gym.envs.classic_control.grid_mdp as grid_map
 
+
+DELTA = []   # 记录模型误差变化过程
 
 class policy_algorithm:
     def __init__(self, grid_mdp):
@@ -55,17 +58,22 @@ class policy_algorithm:
     def policy_evaluate(self, grid_mdp):
 
         MAX_ITERATION = 1000  #最大状态值更新次数，即累计奖赏参数
-        DELTA = []
+
         for t in range(MAX_ITERATION):
             delta = 0.0
             for state in self.states:
                 if state in self.terminate_states: continue
                 new_v = 0.0
-                for action in self.pi_space[state]:
-                    flags, s, r = grid_mdp.transform(state, action)
-                    # 此处考虑选取“每个摇臂”概率值pi(x,a)的变化，可用epsilon-greedy来对这里进行优化
-                    Qxa = (r + self.gamma * self.v[s - 1])  # 状态-动作值，这里执行动作后是1个确定性动作，有明确的新状态
-                    new_v = new_v + Qxa * self.probabilities[state][action]  # 状态值
+                # for action in self.pi_space[state]:
+                #     flags, s, r = grid_mdp.transform(state, action)
+                #     # 根据均匀随机策略进行了策略初始化，那么对于初始化的具体策略来说，pi(x,a)=1，
+                #     # 评估时评估的是一个具体的策略，即self.pi，如果评估随机策略本身那么算法本质上是值迭代了
+                #     Qxa = (r + self.gamma * self.v[s-1])  # 状态-动作值，这里执行动作后是1个确定性动作，有明确的新状态
+                #     new_v = new_v + Qxa * self.probabilities[state][action]  # 状态值
+                flags, s, r = grid_mdp.transform(state, self.pi[state])
+                Qxa = (r + self.gamma * self.v[s-1])
+                new_v = new_v + 1 * Qxa
+
                 delta = delta + abs(self.v[state-1] - new_v)
                 self.v[state-1] = new_v
 
@@ -73,14 +81,6 @@ class policy_algorithm:
             print(f'第{t}次状态值更新：', self.v)
             # if t == MAX_ITERATION-1 : break
             if delta < 1e-6: break   # 迭代终止条件
-        ##############################################################
-        # plt.figure()    # 绘制delta变化曲线
-        # plt.plot(DELTA)
-        # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
-        # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
-        # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
-        # plt.show()
-        ##############################################################
 
     # 策略改进
     def policy_improve(self, grid_mdp):
@@ -99,7 +99,6 @@ class policy_algorithm:
                     Qxa = r + self.gamma * self.v[s-1]
             self.new_pi[state] = a1
 
-
     # 策略评估 + 策略改进 = 策略迭代算法
     def policy_iterate(self, grid_mdp):
         '''
@@ -112,10 +111,10 @@ class policy_algorithm:
             print(f'\n第{i}次改进 状态值： { self.v} \n此次均匀随机策略改进学习结果得到的最优策略：', self.new_pi, '\n')
             # TODO 这里有bug！策略迭代到第二次（i=1）时自然就因为上一次的赋值而终止了
             if self.new_pi == self.pi:
-                break
+                # break
+                continue
             else:
                 self.pi = self.new_pi
-
 
     def search_solution(self, query):
         '''
@@ -181,3 +180,17 @@ if __name__ == "__main__":
     time.sleep(5)
 
     print("--------------------DONE--------------------")
+
+    ##############################################################
+    plt.figure()  # 绘制delta变化曲线
+    plt.grid()
+    plt.plot(md.my_reshape(DELTA, 10), color='r')
+    plt.plot(DELTA, color ='b')
+    # plt.plot(md.cumulative(DELTA),color='y')
+    plt.plot(md.list_fit(DELTA, 3), color='k')
+    plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+    plt.xlabel('迭代次数', fontproperties=myfont)
+    plt.ylabel('dalta', fontproperties=myfont)
+    plt.title("Policy Iteration")
+    plt.show()
+    ##############################################################
