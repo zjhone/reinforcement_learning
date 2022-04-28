@@ -96,7 +96,7 @@ class qlearning_algorithm:
     # 核心算法：
     def qlearning_interate(self):
 
-        MAX_NUM = 1000   # 最大迭代数量
+        MAX_NUM = 10000   # 最大迭代数量
         alpha = 0.1
         Qxa = self.QXA
         countxa = self.counter
@@ -176,14 +176,15 @@ if __name__=="__main__":
 
     print("--------------------DONE--------------------")
     print(f"\n算法耗时： {t1-t0} s")
-
+    ##########################################################
     plt.figure()  # 绘制delta变化曲线
     plt.plot(md.my_reshape(DELTA, 20), color='r')
     plt.plot(DELTA, color ='b')
-    plt.plot(md.cumulative(DELTA),color='y')
+    # plt.plot(md.cumulative(DELTA),color='y')
     plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)
     plt.title("Q-Learning")
     plt.show()
+    ##########################################################

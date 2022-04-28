@@ -10,22 +10,25 @@ import pygame
 from pygame.locals import *
 
 
-pygame.init()
-size = width, height = 150,150
-bgColor = (255,255,255)
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("键盘监控")
-font =pygame.font.Font(None, 30)
-line_height = font.get_linesize()
-position = 0
-screen.fill(bgColor)
-
 if __name__ == "__main__":
     env = gym.make("GridWorld-v1")
     env.reset()
     env.render()
     print(env.gett())
     print("Please input direction:")
+    #################################
+    # 键盘控制程序段
+    pygame.init()
+    size = width, height = 150, 150
+    bgColor = (255, 255, 255)
+    screen = pygame.display.set_mode(size)
+    pygame.display.set_caption("键盘监控")
+    font = pygame.font.Font(None, 30)
+    line_height = font.get_linesize()
+    position = 0
+    screen.fill(bgColor)
+    #################################
+
     while True:
         for event in pygame.event.get():
 

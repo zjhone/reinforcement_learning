@@ -54,7 +54,7 @@ class policy_algorithm:
     # 评估策略，返回状态值函数
     def policy_evaluate(self, grid_mdp):
 
-        MAX_ITERATION = 10  #最大状态值更新次数，即累计奖赏参数
+        MAX_ITERATION = 1000  #最大状态值更新次数，即累计奖赏参数
         DELTA = []
         for t in range(MAX_ITERATION):
             delta = 0.0
@@ -71,15 +71,16 @@ class policy_algorithm:
 
             DELTA.append(delta)
             print(f'第{t}次状态值更新：', self.v)
-            if t == MAX_ITERATION-1 : break
-            # if delta < 1e-6: break
-
+            # if t == MAX_ITERATION-1 : break
+            if delta < 1e-6: break   # 迭代终止条件
+        ##############################################################
         # plt.figure()    # 绘制delta变化曲线
         # plt.plot(DELTA)
         # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
         # plt.xlabel('策略评估迭代次数', fontproperties=myfont)
         # plt.ylabel('状态值函数变化差值dalta', fontproperties=myfont)
         # plt.show()
+        ##############################################################
 
     # 策略改进
     def policy_improve(self, grid_mdp):
@@ -91,7 +92,7 @@ class policy_algorithm:
             Qxa = r + self.gamma * self.v[s-1]
             # 贪婪策略
             for action in self.pi_space[state]:
-                # flags代表时候到达重点，s代表下一个状态，r代表奖励
+                # flags代表是否到达终点，s代表下一个状态，r代表奖励
                 flags, s, r = grid_mdp.transform(state, action)
                 if Qxa <= r + self.gamma * self.v[s-1]:
                     a1 = action
@@ -105,10 +106,11 @@ class policy_algorithm:
         :param grid_mdp: 游戏模型
         :return: 最优策略，放在了类属性里
         '''
-        for i in range(10):  # 策略改进10次
+        for i in range(100):  # 策略改进100次
             self.policy_evaluate(grid_mdp)
             self.policy_improve(grid_mdp)
             print(f'\n第{i}次改进 状态值： { self.v} \n此次均匀随机策略改进学习结果得到的最优策略：', self.new_pi, '\n')
+            # TODO 这里有bug！策略迭代到第二次（i=1）时自然就因为上一次的赋值而终止了
             if self.new_pi == self.pi:
                 break
             else:
@@ -121,7 +123,7 @@ class policy_algorithm:
         :return: 最佳状态-动作对（即最佳策略）
         '''
         ret = list()
-        for i in range(100):  # 路径查询100次
+        for i in range(1000):  # 路径查询100次
             if query in self.terminate_states:
                 # print("结束!")
                 break
@@ -151,7 +153,7 @@ if __name__ == "__main__":
     DP.pi_evaluate()
     print('状态-动作空间：', DP.pi_space)
     print('初始化策略(确定性)：', DP.pi)
-
+    ##############################################
     # env.setState(7)  # 功能测试
     # print('当前状态：', env.getState())
     # env.render()
@@ -161,6 +163,7 @@ if __name__ == "__main__":
     # env.render()
     # print('当前状态：', env.getState())
     # time.sleep(5)
+    ##############################################
 
     print("--------------------CALCULATING--------------------")
     DP.policy_iterate(env)  # 策略迭代算法
