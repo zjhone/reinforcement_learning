@@ -101,10 +101,18 @@ class qlearning_algorithm:
         Qxa = self.QXA
         countxa = self.counter
 
+        MARK = [i+1 for i in range(len(self.states))]
+        for ts in self.terminate_states.keys():
+            MARK.remove(ts)
+
+        # MARK = MARK[::12]
+        # MARK = [1,2,3,4,5]
+        print("起始点集: ", MARK)
+
         flags = 0
         for et in range(MAX_NUM):
             # random的作用为变动采样起始点，避免轨迹为同一条
-            self.x0 = np.random.choice(5, size=1, replace=True)[0] + 1
+            self.x0 = MARK[np.random.choice(len(MARK), size=1, replace=True)[0]]
             x = self.x0
             delta = 0.0
             old_q = 0.0
@@ -204,10 +212,10 @@ if __name__=="__main__":
 
     print("\033[0;32;40mGUIDING……\033[0m")
     best_road = MDP.search_solution(int(my_query))
-    time.sleep(1)
-    env.guide(best_road)
-    time.sleep(2)
-
+    # time.sleep(1)
+    # env.guide(best_road)
+    # time.sleep(2)
+    env.close()
     print("--------------------DONE--------------------")
     print(f"\n算法耗时： {t1-t0} s")
 

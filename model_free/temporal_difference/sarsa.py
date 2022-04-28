@@ -100,10 +100,17 @@ class sarsa_algorithm:
         Qxa = self.QXA
         countxa = self.counter
 
+        MARK = [i+1 for i in range(len(self.states))]
+        for ts in self.terminate_states.keys():
+            MARK.remove(ts)
+        # MARK = [1,2,3,4,5]
+        print("起始点集: ", MARK)
+
+
         flags = 0
         for et in range(MAX_NUM):
             # random的作用为变动采样起始点，避免轨迹为同一条
-            self.x0 = np.random.choice(5, size=1, replace=True)[0] + 1
+            self.x0 = MARK[np.random.choice(len(MARK), size=1, replace=True)[0]]
             x = self.x0
             a = self.pi[x]
             delta = 0.0
@@ -154,7 +161,7 @@ class sarsa_algorithm:
             # print(f'\033[0;33;40m第{et}次最优状态-动作：{self.pi}\033[0m')
             DELTA.append(delta)
 
-            if delta < 1e-6:  break   # 达到收敛条件，退出大循环
+            if delta < 1e-8:  break   # 达到收敛条件，退出大循环
 
         # print(f'\n最终的状态-动作值函数： {Qxa}')
         # print(f'计数器： {countxa}')
@@ -204,9 +211,9 @@ if __name__=="__main__":
 
     print("\033[0;32;40mGUIDING……\033[0m")
     best_road = MDP.search_solution(int(my_query))
-    time.sleep(1)
-    env.guide(best_road)
-    time.sleep(2)
+    # time.sleep(1)
+    # env.guide(best_road)
+    # time.sleep(2)
 
     print("--------------------DONE--------------------")
     print(f"\n算法耗时： {t1-t0} s")
