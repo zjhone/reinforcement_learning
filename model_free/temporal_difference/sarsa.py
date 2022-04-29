@@ -103,7 +103,9 @@ class sarsa_algorithm:
         MARK = [i+1 for i in range(len(self.states))]
         for ts in self.terminate_states.keys():
             MARK.remove(ts)
+        # MARK = MARK[::1]
         # MARK = [1,2,3,4,5]
+        MARK = [55]
         print("起始点集: ", MARK)
 
 
@@ -192,8 +194,8 @@ class sarsa_algorithm:
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v1")
-    env.setState(1)
-    env.render()
+    env.setState(66)
+    # env.render()
     MDP = sarsa_algorithm(env)
 
     MDP.init_params()
@@ -206,8 +208,8 @@ if __name__=="__main__":
     # 查询最优策略
     my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
     env.setState(int(my_query))
-    env.render()
-    time.sleep(1)
+    # env.render()
+    # time.sleep(1)
 
     print("\033[0;32;40mGUIDING……\033[0m")
     best_road = MDP.search_solution(int(my_query))
@@ -220,10 +222,10 @@ if __name__=="__main__":
     ##########################################################
     plt.figure()  # 绘制delta变化曲线
     plt.grid()
-    plt.plot(md.my_reshape(DELTA, 20), color='r')
     plt.plot(DELTA, color ='b')
+    plt.plot(md.my_reshape(DELTA, 20), color='r')
     # plt.plot(md.cumulative(DELTA),color='y')
-    plt.plot(md.list_fit(DELTA, 3), color='k')
+    plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)

@@ -97,7 +97,7 @@ class qlearning_algorithm:
     def qlearning_interate(self):
 
         MAX_NUM = 100000   # 最大迭代数量
-        alpha = 0.1
+        alpha = 0.6
         Qxa = self.QXA
         countxa = self.counter
 
@@ -105,7 +105,8 @@ class qlearning_algorithm:
         for ts in self.terminate_states.keys():
             MARK.remove(ts)
 
-        # MARK = MARK[::12]
+        # MARK = MARK[::1]
+        MARK = [55]
         # MARK = [1,2,3,4,5]
         print("起始点集: ", MARK)
 
@@ -193,7 +194,7 @@ class qlearning_algorithm:
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v1")
-    env.setState(1)
+    env.setState(66)
     env.render()
     MDP = qlearning_algorithm(env)
 
@@ -222,8 +223,8 @@ if __name__=="__main__":
     ##########################################################
     plt.figure()  # 绘制delta变化曲线
     plt.grid()
-    plt.plot(md.my_reshape(DELTA, 20), color='r')
     plt.plot(DELTA, color ='b')
+    plt.plot(md.my_reshape(DELTA, 20), color='r')
     # plt.plot(md.cumulative(DELTA),color='y')
     plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
