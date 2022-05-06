@@ -7,6 +7,9 @@ import gym
 import time
 import numpy as np
 
+
+DELTA = []   # 记录模型误差变化过程
+
 class mento_carlo_on_policy:
     def __init__(self, grid_mdp):
         # 初始化模型参数E=<X, A, P, R>, 基于假设模型未知
@@ -71,7 +74,7 @@ class mento_carlo_on_policy:
     # 核心算法：
     def mente_carlo_interate(self):
 
-        MAX_SAMPLING_NUM = 10000   # 最大轨迹数量
+        MAX_SAMPLING_NUM = 100000   # 最大轨迹数量
         Qxa = dict()
         countxa = dict()
 
@@ -127,6 +130,29 @@ class mento_carlo_on_policy:
             print(countxa)
         print(f'\n\033[0;32;40m当前最佳策略：{self.pi}\033[0m')
 
+    def search_solution(self, query):
+        '''
+        :param query: 查询某个状态的最佳路径
+        :return: 最佳状态-动作对（即最佳策略）
+        '''
+        ret = list()
+        for i in range(200):  # 路径最多查询200次
+            if query in self.terminate_states:
+                # print("结束!")
+                break
+            else:
+                action = self.pi[query]
+                key = "%d_%s"%(query, action)
+                # print(f'{query}-->{action}')
+                ret.append((query, action))
+                query = self.state_and_action_space[key]
+                continue
+            print("\033[0;31;40m不存在最好路径!\033[0m")
+
+        print(f"\033[0;32;40m最佳路径： {ret}\033[0m")
+        return ret
+
+
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v0")
@@ -141,3 +167,27 @@ if __name__=="__main__":
     print(f"\n算法耗时： {t1-t0} s")
     print("--------------------DONE--------------------")
 
+    # 查询最优策略
+    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
+    env.setState(int(my_query))
+    env.render()
+    time.sleep(1)
+
+    best_road = MF.search_solution(int(my_query))
+    time.sleep(1)
+    env.guide(best_road)
+    time.sleep(2)
+    env.close()
+    # ##########################################################
+    # plt.figure()  # 绘制delta变化曲线
+    # plt.grid()
+    # plt.plot(DELTA, color ='b')
+    # plt.plot(md.my_reshape(DELTA, 20), color='r')
+    # # plt.plot(md.cumulative(DELTA),color='y')
+    # plt.plot(md.list_fit(DELTA, 5), color='k')
+    # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+    # plt.xlabel('迭代次数', fontproperties=myfont)
+    # plt.ylabel('dalta', fontproperties=myfont)
+    # plt.title("Q-Learning")
+    # plt.show()
+    # ##########################################################

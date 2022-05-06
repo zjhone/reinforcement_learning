@@ -141,10 +141,10 @@ if __name__ =="__main__":
     ##########################################################
     plt.figure()  # 绘制delta变化曲线
     plt.grid()
-    plt.plot(md.my_reshape(DELTA, 20), color='r')
+    plt.plot(md.my_reshape(DELTA, 5), color='r', linestyle=':')
     plt.plot(DELTA, color ='b')
     # plt.plot(md.cumulative(DELTA),color='y')
-    plt.plot(md.list_fit(DELTA, 3), color='k')
+    # plt.plot(md.list_fit(DELTA, 3), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)

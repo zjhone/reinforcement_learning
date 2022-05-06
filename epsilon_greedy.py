@@ -4,6 +4,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties  # 解决中文无法正常显示问题
+fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
+myfont = FontProperties(fname=fname)
 
 class Gambling_machine:
     K = 0   # 0-摇臂
@@ -64,7 +67,11 @@ if __name__ == "__main__":
     plt.figure()
     for i in epsilon:
         ret, cnt, Q_graph = epsilon_greedy(GM, T, i)
-        print(f"epsilon={i}时最终收益：{ret}。摇臂详情：{cnt}。最后三次收益：{Q_graph[-4:-1]}")
+        print(f"epsilon={i}时最终收益：{ret}。摇臂详情：{cnt}。最后一次收益：{Q_graph[-1]}")
         plt.plot(Q_graph, label="ta="+str(i))
-    plt.legend(loc="best")
+    # plt.legend(loc="best")
+    plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+    plt.ylabel('平均奖赏', fontproperties=myfont)
+    plt.xlabel('摇臂次数', fontproperties=myfont)
+    plt.grid()
     plt.show()
