@@ -6,7 +6,11 @@ import re
 import gym
 import time
 import numpy as np
-
+import my_func.list_deal as md
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties  # 解决中文无法显示问题
+fname = "/media/zjh/SDXC/linux-tools/font/simhei.ttf"
+myfont = FontProperties(fname=fname)
 
 DELTA = []   # 记录模型误差变化过程
 
@@ -74,11 +78,11 @@ class mento_carlo_on_policy:
     # 核心算法：
     def mente_carlo_interate(self):
 
-        MAX_SAMPLING_NUM = 100000   # 最大轨迹数量
+        MAX_SAMPLING_NUM = 1000000   # 最大轨迹数量
         Qxa = dict()
         countxa = dict()
 
-        for s in range(MAX_SAMPLING_NUM):
+        for s in range(int(MAX_SAMPLING_NUM)):
             smp = self.trace_cal()   # 采样
             self.x0 = np.random.choice(5, size=1, replace=True)[0]+1 # 变动采样起始点
             print(f"\n第{s}次采样轨迹为： {smp}")
@@ -96,16 +100,24 @@ class mento_carlo_on_policy:
                     Qxa[pt[0]][pt[1]] = 0.0
                     countxa[pt[0]][pt[1]] = 0
 
+            delta = 0.0
             for t in range(self.T):
                 R = 0  # 求奖赏
                 for j in np.linspace(t+1, self.T-1, num=(self.T-t+1), dtype=int):
                     R = R + (smp[t][2] / (self.T-t))
                 # 值函数更新
+                oldqxa = Qxa[smp[t][0]][smp[t][1]]
                 Qxa[smp[t][0]][smp[t][1]] = (Qxa[smp[t][0]][smp[t][1]] *
                                                                  countxa[smp[t][0]][smp[t][1]] + R) / \
                                                                 (countxa[smp[t][0]][smp[t][1]] + 1)
                 # 计数器
                 countxa[smp[t][0]][smp[t][1]] = countxa[smp[t][0]][smp[t][1]] + 1
+
+                delta = delta + abs(Qxa[smp[t][0]][smp[t][1]] - oldqxa)
+
+            if delta < 1e-5: break  # 迭代终止条件
+
+            DELTA.append(delta)  # 模型误差
 
             # 对所有已见状态x
             for xkt in Qxa.keys():
@@ -168,26 +180,27 @@ if __name__=="__main__":
     print("--------------------DONE--------------------")
 
     # 查询最优策略
-    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
-    env.setState(int(my_query))
-    env.render()
-    time.sleep(1)
+    # my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
+    # env.setState(int(my_query))
+    # env.render()
+    # time.sleep(1)
 
-    best_road = MF.search_solution(int(my_query))
-    time.sleep(1)
-    env.guide(best_road)
-    time.sleep(2)
+    # best_road = MF.search_solution(int(my_query))
+    # time.sleep(1)
+    # env.guide(best_road)
+    # time.sleep(2)
     env.close()
-    # ##########################################################
-    # plt.figure()  # 绘制delta变化曲线
-    # plt.grid()
-    # plt.plot(DELTA, color ='b')
+    ##########################################################
+    plt.figure()  # 绘制delta变化曲线
+    plt.grid()
+    print(DELTA[-1])
+    plt.plot(DELTA, color ='b')
     # plt.plot(md.my_reshape(DELTA, 20), color='r')
-    # # plt.plot(md.cumulative(DELTA),color='y')
+    # plt.plot(md.cumulative(DELTA),color='y')
     # plt.plot(md.list_fit(DELTA, 5), color='k')
-    # plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
-    # plt.xlabel('迭代次数', fontproperties=myfont)
-    # plt.ylabel('dalta', fontproperties=myfont)
-    # plt.title("Q-Learning")
-    # plt.show()
-    # ##########################################################
+    plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
+    plt.xlabel('迭代次数', fontproperties=myfont)
+    plt.ylabel('dalta', fontproperties=myfont)
+    plt.title("monte carlo on-policy")
+    plt.show()
+    ##########################################################
