@@ -82,9 +82,19 @@ class mento_carlo_on_policy:
         Qxa = dict()
         countxa = dict()
 
+        MARK = [i+1 for i in range(len(self.states))]   # 起始点集合
+        for ts in self.terminate_states.keys():
+            MARK.remove(ts)
+
+        # MARK = MARK[::1]
+        # MARK = [1,2,3,4,5]
+        print("起始点集: ", MARK)
+
         for s in range(int(MAX_SAMPLING_NUM)):
             smp = self.trace_cal()   # 采样
-            self.x0 = np.random.choice(5, size=1, replace=True)[0]+1 # 变动采样起始点
+            # random的作用为变动采样起始点，避免轨迹为同一条
+            self.x0 = MARK[np.random.choice(len(MARK), size=1, replace=True)[0]]
+
             print(f"\n第{s}次采样轨迹为： {smp}")
             for pt in smp:
                 # 拓展Qxa与countxa
@@ -115,9 +125,8 @@ class mento_carlo_on_policy:
 
                 delta = delta + abs(Qxa[smp[t][0]][smp[t][1]] - oldqxa)
 
-            if delta < 1e-5: break  # 迭代终止条件
-
             DELTA.append(delta)  # 模型误差
+            if delta < 1e-5: break  # 迭代终止条件
 
             # 对所有已见状态x
             for xkt in Qxa.keys():
@@ -140,6 +149,7 @@ class mento_carlo_on_policy:
 
             print(Qxa)
             print(countxa)
+        print("起始点集: ", MARK)
         print(f'\n\033[0;32;40m当前最佳策略：{self.pi}\033[0m')
 
     def search_solution(self, query):
@@ -167,9 +177,9 @@ class mento_carlo_on_policy:
 
 
 if __name__=="__main__":
-    env = gym.make("GridWorld-v0")
+    env = gym.make("GridWorld-v1")
     env.setState(1)
-    # env.render()
+    env.render()
     MF = mento_carlo_on_policy(env)
     MF.init_probabilities()
     print('动作空间细节：', MF.pi_space)
@@ -180,12 +190,12 @@ if __name__=="__main__":
     print("--------------------DONE--------------------")
 
     # 查询最优策略
-    # my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
-    # env.setState(int(my_query))
-    # env.render()
-    # time.sleep(1)
+    my_query = input("\033[0;32;40mPlease set the robot state:\033[0m")
+    env.setState(int(my_query))
+    env.render()
+    time.sleep(1)
 
-    # best_road = MF.search_solution(int(my_query))
+    best_road = MF.search_solution(int(my_query))
     # time.sleep(1)
     # env.guide(best_road)
     # time.sleep(2)
