@@ -105,9 +105,7 @@ class sarsa_algorithm:
             MARK.remove(ts)
         # MARK = MARK[::1]
         # MARK = [1,2,3,4,5]
-        MARK = [55]
-        print("起始点集: ", MARK)
-
+        # MARK = [55]
 
         flags = 0
         for et in range(MAX_NUM):
@@ -163,10 +161,11 @@ class sarsa_algorithm:
             # print(f'\033[0;33;40m第{et}次最优状态-动作：{self.pi}\033[0m')
             DELTA.append(delta)
 
-            if delta < 1e-8:  break   # 达到收敛条件，退出大循环
+            if delta < 1e-5:  break   # 达到收敛条件，退出大循环
 
-        # print(f'\n最终的状态-动作值函数： {Qxa}')
-        # print(f'计数器： {countxa}')
+        print(f'\n最终的状态-动作值函数： {Qxa}')
+        print(f'计数器： {countxa}')
+        print("起始点集: ", MARK)
         print(f'\n\033[1;32;40m当前最佳策略：{self.pi}\033[0m')
 
     def search_solution(self, query):
@@ -175,7 +174,7 @@ class sarsa_algorithm:
         :return: 最佳状态-动作对（即最佳策略）
         '''
         ret = list()
-        for i in range(100):  # 路径查询100次
+        for i in range(200):  # 路径查询200次
             if query in self.terminate_states:
                 # print("结束!")
                 break
@@ -194,8 +193,8 @@ class sarsa_algorithm:
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v1")
-    env.setState(66)
-    # env.render()
+    env.setState(1)
+    env.render()
     MDP = sarsa_algorithm(env)
 
     MDP.init_params()
@@ -225,7 +224,7 @@ if __name__=="__main__":
     plt.plot(DELTA, color ='b')
     plt.plot(md.my_reshape(DELTA, 20), color='r')
     # plt.plot(md.cumulative(DELTA),color='y')
-    plt.plot(md.list_fit(DELTA, 5), color='k')
+    # plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)

@@ -112,6 +112,7 @@ class mento_carlo_on_policy:
 
             delta = 0.0
             for t in range(self.T):
+
                 R = 0  # 求奖赏
                 for j in np.linspace(t+1, self.T-1, num=(self.T-t+1), dtype=int):
                     R = R + (smp[t][2] / (self.T-t))
@@ -124,6 +125,8 @@ class mento_carlo_on_policy:
                 countxa[smp[t][0]][smp[t][1]] = countxa[smp[t][0]][smp[t][1]] + 1
 
                 delta = delta + abs(Qxa[smp[t][0]][smp[t][1]] - oldqxa)
+                # 到达终止点，跳出子循环重来
+                if smp[t][0] in self.terminate_states: break
 
             DELTA.append(delta)  # 模型误差
             if delta < 1e-5: break  # 迭代终止条件
@@ -149,7 +152,8 @@ class mento_carlo_on_policy:
 
             print(Qxa)
             print(countxa)
-        print("起始点集: ", MARK)
+        # print("起始点集: ", MARK)
+        # print(self.R)
         print(f'\n\033[0;32;40m当前最佳策略：{self.pi}\033[0m')
 
     def search_solution(self, query):

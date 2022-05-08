@@ -106,7 +106,7 @@ class qlearning_algorithm:
             MARK.remove(ts)
 
         # MARK = MARK[::1]
-        MARK = [55]
+        # MARK = [55]
         # MARK = [1,2,3,4,5]
         print("起始点集: ", MARK)
 
@@ -165,8 +165,8 @@ class qlearning_algorithm:
 
             if delta < 1e-6:  break   # 达到收敛条件，退出大循环
 
-        # print(f'\n最终的状态-动作值函数： {Qxa}')
-        # print(f'计数器： {countxa}')
+        print(f'\n最终的状态-动作值函数： {Qxa}')
+        print(f'计数器： {countxa}')
         print(f'\n\033[1;32;40m当前最佳策略：{self.pi}\033[0m')
 
     def search_solution(self, query):
@@ -194,7 +194,7 @@ class qlearning_algorithm:
 
 if __name__=="__main__":
     env = gym.make("GridWorld-v1")
-    env.setState(66)
+    env.setState(1)
     env.render()
     MDP = qlearning_algorithm(env)
 
@@ -226,7 +226,7 @@ if __name__=="__main__":
     plt.plot(DELTA, color ='b')
     plt.plot(md.my_reshape(DELTA, 20), color='r')
     # plt.plot(md.cumulative(DELTA),color='y')
-    plt.plot(md.list_fit(DELTA, 5), color='k')
+    # plt.plot(md.list_fit(DELTA, 5), color='k')
     plt.rcParams['font.sans-serif'] = ['Ubuntu']  # 用来正常显示中文标签
     plt.xlabel('迭代次数', fontproperties=myfont)
     plt.ylabel('dalta', fontproperties=myfont)
